@@ -300,7 +300,7 @@ function buildVoiceScript() {
     ? `Budget update: ${income?'Total income is $'+income.toLocaleString()+'. ':''}${expenses?'Expenses are $'+expenses.toLocaleString()+'. ':''}${bank?'Bank balance is $'+bank.toLocaleString()+'. ':''}Net balance is $'+net.toLocaleString()+'. '
     : '';
 
-  voiceScript = `Good morning Keith! Today is ${today}. ${todoText}${weatherText}${newsText}${budgetText}Have a great day!`;
+  const voiceScript = `Good morning Keith! Today is ${today}. ${todoText}${weatherText}${newsText}${budgetText}Have a great day!`;
   return voiceScript;
 }
 
