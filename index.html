@@ -239,7 +239,7 @@ async function fetchWeather() {
 let newsHeadlines = [];
 async function fetchNews() {
   try {
-    const data = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.foxnews.com%2Ffoxnews%2Flatest&count=3').then(r=>r.json());
+    const data = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.foxnews.com%2Ffoxnews%2Flatest&count=3&_=' + Date.now()).then(r=>r.json());
     newsHeadlines = (data.items||[]).slice(0,3).map(i=>({title:i.title,link:i.link}));
     if (!newsHeadlines.length) throw new Error('empty');
     document.getElementById('news-content').innerHTML = newsHeadlines.map((item,i)=>`<div class="news-item"><div class="news-num">${i+1}</div><div><div class="news-text">${item.title}</div><div class="news-source">Fox News</div></div></div>`).join('');
@@ -321,7 +321,11 @@ function speakText(text) {
   utter.pitch = 1.2;
   utter.onstart = () => setVoiceStatus('speaking','Reading your morning briefing...');
   utter.onend   = () => setVoiceStatus('done','✓ Briefing complete');
-  utter.onerror = (e) => setVoiceStatus('error','Audio error — try replay');
+  utter.onerror = (e) => {
+    setVoiceStatus('error','Tap to start — autoplay blocked');
+    document.getElementById('voice-controls').innerHTML =
+      '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
+  };
 
   function go() {
     const vs = window.speechSynthesis.getVoices();
@@ -355,15 +359,14 @@ function speakText(text) {
 function stopVoice() { window.speechSynthesis.cancel(); setVoiceStatus('done','✓ Stopped'); }
 function replayVoice() { buildVoiceScript(); speakText(voiceScript); }
 
-// Wait for BOTH weather AND news before showing play button
+// Wait for BOTH weather AND news, then auto-speak the briefing
 async function initVoice() {
   setVoiceStatus('loading','Loading weather and news...');
   await Promise.all([fetchWeather(), fetchNews()]);
   buildVoiceScript();
-  document.getElementById('voice-status').textContent = 'Tap to hear your full briefing';
-  document.getElementById('voice-status').className = 'voice-status done';
   document.getElementById('voice-controls').innerHTML =
     '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
+  startBriefing();
 }
 
 function startBriefing() { buildVoiceScript(); speakText(voiceScript); }
