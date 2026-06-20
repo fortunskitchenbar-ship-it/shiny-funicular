@@ -297,7 +297,7 @@ function buildVoiceScript() {
     : 'Fox News headlines unavailable. ';
 
   const budgetText = (income||bank||budgetBalance)
-    ? `Budget update: ${income?'Total income is $'+income.toLocaleString()+'. ':''}${expenses?'Expenses are $'+expenses.toLocaleString()+'. ':''}${bank?'Bank balance is $'+bank.toLocaleString()+'. ':''}Net balance is $'+net.toLocaleString()+'. '
+    ? `Budget update: ${income?'Total income is $'+income.toLocaleString()+'. ':''}${expenses?'Expenses are $'+expenses.toLocaleString()+'. ':''}${bank?'Bank balance is $'+bank.toLocaleString()+'. ':''}Net balance is $${net.toLocaleString()}. `
     : '';
 
   voiceScript = `Good morning Keith! Today is ${today}. ${todoText}${weatherText}${newsText}${budgetText}Have a great day!`;
