@@ -72,11 +72,11 @@
   .budget-val.green { color:var(--green); } .budget-val.red { color:#e06060; } .budget-val.gold { color:var(--gold-light); }
   .budget-input { background:var(--warm-dark); border:1px solid rgba(201,168,76,.15); border-radius:3px; padding:5px 10px; color:var(--cream); font-family:'DM Mono',monospace; font-size:13px; width:120px; text-align:right; outline:none; transition:border-color .2s; }
   .budget-input:focus { border-color:rgba(201,168,76,.4); }
-  .news-item { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05); align-items:flex-start; }
-  .news-item:last-child { border-bottom:none; }
-  .news-num { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--crimson); line-height:1.1; flex-shrink:0; width:22px; }
-  .news-text { font-size:13px; line-height:1.5; color:var(--cream); }
-  .news-source { font-family:'DM Mono',monospace; font-size:9px; color:var(--cream-dim); letter-spacing:.1em; margin-top:3px; }
+  .email-item { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05); align-items:flex-start; }
+  .email-item:last-child { border-bottom:none; }
+  .email-num { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--crimson); line-height:1.1; flex-shrink:0; width:22px; }
+  .email-subject { font-size:13px; line-height:1.5; color:var(--cream); }
+  .email-from { font-family:'DM Mono',monospace; font-size:9px; color:var(--cream-dim); letter-spacing:.1em; margin-top:3px; }
   .todo-item { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,.05); }
   .todo-item:last-child { border-bottom:none; }
   .todo-check { width:18px; height:18px; border:1px solid rgba(201,168,76,.4); border-radius:3px; background:transparent; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
@@ -170,8 +170,8 @@
 
   <div class="grid-2">
     <div class="card">
-      <div class="card-label">Fox News · Top Headlines</div>
-      <div id="news-content"><div style="color:var(--cream-dim);font-size:13px;">Fetching headlines...</div></div>
+      <div class="card-label">Recent Email</div>
+      <div id="email-content"><div style="color:var(--cream-dim);font-size:13px;">Fetching...</div></div>
     </div>
     <div class="card">
       <div class="card-label">Personal Budget Snapshot</div>
@@ -222,29 +222,89 @@ setInterval(updateClock, 10000);
 
 // ── WEATHER ────────────────────────────────────────────────
 let weatherData = {};
-async function fetchWeather() {
-  try {
-    const d = await fetch('https://api.open-meteo.com/v1/forecast?latitude=33.6636&longitude=-116.3103&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FLos_Angeles&forecast_days=1').then(r=>r.json());
-    const c=d.current, daily=d.daily;
-    const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'🌨️',80:'🌦️',95:'⛈️'};
-    const descs={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',51:'Light Drizzle',61:'Rain',71:'Snow',80:'Showers',95:'Thunderstorms'};
-    weatherData={temp:Math.round(c.temperature_2m),feels:Math.round(c.apparent_temperature),desc:descs[c.weathercode]||'Mixed',icon:icons[c.weathercode]||'🌡️',wind:Math.round(c.windspeed_10m),humidity:c.relativehumidity_2m,high:Math.round(daily.temperature_2m_max[0]),low:Math.round(daily.temperature_2m_min[0]),rain:daily.precipitation_probability_max[0]};
-    document.getElementById('weather-content').innerHTML=`<div class="weather-main"><div class="weather-icon">${weatherData.icon}</div><div><div class="weather-temp">${weatherData.temp}<sup>°F</sup></div><div class="weather-detail">${weatherData.desc} · Feels ${weatherData.feels}°F<br>Wind ${weatherData.wind} mph · Humidity ${weatherData.humidity}%</div></div></div><div class="weather-row"><div class="weather-stat"><div class="weather-stat-val">${weatherData.high}°</div><div class="weather-stat-lbl">High</div></div><div class="weather-stat"><div class="weather-stat-val">${weatherData.low}°</div><div class="weather-stat-lbl">Low</div></div><div class="weather-stat"><div class="weather-stat-val">${weatherData.rain}%</div><div class="weather-stat-lbl">Rain</div></div></div>`;
-  } catch(e) {
-    document.getElementById('weather-content').innerHTML='<div style="font-size:13px;color:var(--cream-dim);">Weather unavailable</div>';
-  }
+
+function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+
+async function fetchWeatherOnce() {
+  const d = await fetch('https://api.open-meteo.com/v1/forecast?latitude=33.6636&longitude=-116.3103&current=temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FLos_Angeles&forecast_days=1').then(r=>r.json());
+  const c=d.current, daily=d.daily;
+  const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',71:'🌨️',80:'🌦️',95:'⛈️'};
+  const descs={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Foggy',51:'Light Drizzle',61:'Rain',71:'Snow',80:'Showers',95:'Thunderstorms'};
+  return {temp:Math.round(c.temperature_2m),feels:Math.round(c.apparent_temperature),desc:descs[c.weathercode]||'Mixed',icon:icons[c.weathercode]||'🌡️',wind:Math.round(c.windspeed_10m),humidity:c.relativehumidity_2m,high:Math.round(daily.temperature_2m_max[0]),low:Math.round(daily.temperature_2m_min[0]),rain:daily.precipitation_probability_max[0]};
 }
 
-// ── NEWS ───────────────────────────────────────────────────
-let newsHeadlines = [];
-async function fetchNews() {
+// Open-Meteo occasionally times out on a per-request/per-network basis. Retry
+// once after a short delay before giving up, to smooth over transient blips.
+async function fetchWeather() {
   try {
-    const data = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.foxnews.com%2Ffoxnews%2Flatest&count=3&_=' + Date.now()).then(r=>r.json());
-    newsHeadlines = (data.items||[]).slice(0,3).map(i=>({title:i.title,link:i.link}));
-    if (!newsHeadlines.length) throw new Error('empty');
-    document.getElementById('news-content').innerHTML = newsHeadlines.map((item,i)=>`<div class="news-item"><div class="news-num">${i+1}</div><div><div class="news-text">${item.title}</div><div class="news-source">Fox News</div></div></div>`).join('');
+    weatherData = await fetchWeatherOnce();
+  } catch (e) {
+    try {
+      await sleep(2000);
+      weatherData = await fetchWeatherOnce();
+    } catch (e2) {
+      document.getElementById('weather-content').innerHTML='<div style="font-size:13px;color:var(--cream-dim);">Weather unavailable</div>';
+      return;
+    }
+  }
+  document.getElementById('weather-content').innerHTML=`<div class="weather-main"><div class="weather-icon">${weatherData.icon}</div><div><div class="weather-temp">${weatherData.temp}<sup>°F</sup></div><div class="weather-detail">${weatherData.desc} · Feels ${weatherData.feels}°F<br>Wind ${weatherData.wind} mph · Humidity ${weatherData.humidity}%</div></div></div><div class="weather-row"><div class="weather-stat"><div class="weather-stat-val">${weatherData.high}°</div><div class="weather-stat-lbl">High</div></div><div class="weather-stat"><div class="weather-stat-val">${weatherData.low}°</div><div class="weather-stat-lbl">Low</div></div><div class="weather-stat"><div class="weather-stat-val">${weatherData.rain}%</div><div class="weather-stat-lbl">Rain</div></div></div>`;
+}
+
+// ── RECENT EMAIL ───────────────────────────────────────────
+// Reads the latest 3 emails from a published Google Sheet (CSV).
+// The sheet is kept updated by a Zapier Zap (Gmail "New Email" trigger ->
+// shifts rows down -> writes from/subject/date into rows 2-4).
+// Replace SHEET_CSV_URL below with your actual "Publish to web" CSV link
+// from Google Sheets (File > Share > Publish to web > CSV).
+const SHEET_CSV_URL = 'REPLACE_WITH_YOUR_PUBLISHED_SHEET_CSV_URL';
+
+function parseCsvLine(line) {
+  const result = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i+1] === '"') { cur += '"'; i++; }
+        else { inQuotes = false; }
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ',') { result.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  result.push(cur);
+  return result.map(s=>s.trim());
+}
+
+let recentEmails = [];
+
+async function fetchRecentEmails() {
+  const emailEl = document.getElementById('email-content');
+  if (!SHEET_CSV_URL || SHEET_CSV_URL.includes('REPLACE_WITH_YOUR')) {
+    emailEl.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">Email sheet not configured yet</div>';
+    return;
+  }
+  try {
+    const text = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes('?') ? '&' : '?') + '_=' + Date.now()).then(r=>r.text());
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    const dataLines = lines.slice(1, 4);
+    recentEmails = dataLines.map(line => {
+      const [from, subject, date] = parseCsvLine(line);
+      return { from: from||'', subject: subject||'', date: date||'' };
+    }).filter(e => e.from || e.subject);
+
+    if (!recentEmails.length) throw new Error('empty');
+
+    emailEl.innerHTML = recentEmails.map((e,i) =>
+      `<div class="email-item"><div class="email-num">${i+1}</div><div><div class="email-subject">${e.subject||'(no subject)'}</div><div class="email-from">${e.from}</div></div></div>`
+    ).join('');
   } catch(e) {
-    document.getElementById('news-content').innerHTML='<div style="font-size:13px;color:var(--cream-dim);">Headlines unavailable</div>';
+    emailEl.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">Recent email unavailable</div>';
   }
 }
 
@@ -290,17 +350,12 @@ function buildVoiceScript() {
     ? `Weather in La Quinta: High ${weatherData.high} degrees, ${weatherData.desc}. Wind ${weatherData.wind} miles per hour. Rain chance ${weatherData.rain} percent. `
     : '';
 
-  const newsText = newsHeadlines.length===3
-    ? `Top Fox News headlines: 1. ${newsHeadlines[0].title}. 2. ${newsHeadlines[1].title}. 3. ${newsHeadlines[2].title}. `
-    : newsHeadlines.length > 0
-    ? `Top Fox News headline: ${newsHeadlines[0].title}. `
-    : 'Fox News headlines unavailable. ';
-
+  // Fixed: was producing a literal double dollar sign ($$1,234.00). Now a single "$".
   const budgetText = (income||bank||budgetBalance)
-    ? `Budget update: ${income?'Total income is $'+income.toLocaleString()+'. ':''}${expenses?'Expenses are $'+expenses.toLocaleString()+'. ':''}${bank?'Bank balance is $'+bank.toLocaleString()+'. ':''}Net balance is $${net.toLocaleString()}. `
+    ? `Budget update: ${income?'Total income is $'+income.toLocaleString()+'. ':''}${expenses?'Expenses are $'+expenses.toLocaleString()+'. ':''}${bank?'Bank balance is $'+bank.toLocaleString()+'. ':''}Net balance is $${net.toLocaleString()}. `.replace('$${net.toLocaleString()}', '$' + net.toLocaleString())
     : '';
 
-  voiceScript = `Good morning Keith! Today is ${today}. ${todoText}${weatherText}${newsText}${budgetText}Have a great day!`;
+  voiceScript = `Good morning Keith! Today is ${today}. ${todoText}${weatherText}${budgetText}Have a great day!`;
   return voiceScript;
 }
 
@@ -313,45 +368,74 @@ function setVoiceStatus(state, msg) {
   else if (state==='done'||state==='error') ctrl.innerHTML = '<button class="btn-voice btn-replay" onclick="replayVoice()">▶ Replay</button>';
 }
 
-function speakText(text) {
+// iOS Safari's speechSynthesis silently truncates long single utterances
+// (roughly 200+ characters, inconsistently). The fix: split the script into
+// sentence-level chunks and speak them as a queue of short utterances.
+function splitIntoChunks(text) {
+  return text.split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
+}
+
+function pickVoice() {
+  const vs = window.speechSynthesis.getVoices();
+  return (
+    vs.find(v=>v.name==='Zira') ||
+    vs.find(v=>v.name==='Ava') ||
+    vs.find(v=>v.name==='Samantha') ||
+    vs.find(v=>v.name==='Victoria') ||
+    vs.find(v=>v.name==='Karen') ||
+    vs.find(v=>v.name.includes('Allison')) ||
+    vs.find(v=>v.name==='Google US English Female') ||
+    vs.find(v=>v.name==='Google UK English Female') ||
+    vs.find(v=>v.lang==='en-US'&&/female/i.test(v.name)) ||
+    vs.find(v=>v.lang.startsWith('en-US')) ||
+    vs[0]
+  );
+}
+
+function speakText(text, onFirstStart) {
   if (!window.speechSynthesis) { setVoiceStatus('error','Speech not supported'); return; }
   window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 0.93;
-  utter.pitch = 1.2;
-  utter.onstart = () => setVoiceStatus('speaking','Reading your morning briefing...');
-  utter.onend   = () => setVoiceStatus('done','✓ Briefing complete');
-  utter.onerror = (e) => {
-    setVoiceStatus('error','Tap to start — autoplay blocked');
-    document.getElementById('voice-controls').innerHTML =
-      '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
-  };
 
-  function go() {
-    const vs = window.speechSynthesis.getVoices();
-    // Young female voice priority list
-    const v =
-      vs.find(v=>v.name==='Zira') ||
-      vs.find(v=>v.name==='Ava') ||
-      vs.find(v=>v.name==='Samantha') ||
-      vs.find(v=>v.name==='Victoria') ||
-      vs.find(v=>v.name==='Karen') ||
-      vs.find(v=>v.name.includes('Allison')) ||
-      vs.find(v=>v.name==='Google US English Female') ||
-      vs.find(v=>v.name==='Google UK English Female') ||
-      vs.find(v=>v.lang==='en-US'&&/female/i.test(v.name)) ||
-      vs.find(v=>v.lang.startsWith('en-US')) ||
-      vs[0];
+  const chunks = splitIntoChunks(text);
+  if (!chunks.length) { setVoiceStatus('done','✓ Briefing complete'); return; }
+  let idx = 0;
+  let startedAny = false;
+
+  function speakNextChunk() {
+    if (idx >= chunks.length) {
+      setVoiceStatus('done','✓ Briefing complete');
+      return;
+    }
+    const utter = new SpeechSynthesisUtterance(chunks[idx]);
+    utter.rate = 0.93;
+    utter.pitch = 1.2;
+    const v = pickVoice();
     if (v) utter.voice = v;
+
+    utter.onstart = () => {
+      if (!startedAny && typeof onFirstStart === 'function') onFirstStart();
+      startedAny = true;
+      setVoiceStatus('speaking','Reading your morning briefing...');
+    };
+    utter.onend = () => { idx++; speakNextChunk(); };
+    utter.onerror = () => {
+      if (!startedAny) {
+        setVoiceStatus('error','Tap to start — autoplay blocked');
+        document.getElementById('voice-controls').innerHTML =
+          '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
+      } else {
+        idx++; speakNextChunk();
+      }
+    };
     window.speechSynthesis.speak(utter);
   }
 
   if (window.speechSynthesis.getVoices().length > 0) {
-    go();
+    speakNextChunk();
   } else {
     window.speechSynthesis.onvoiceschanged = () => {
       window.speechSynthesis.onvoiceschanged = null;
-      go();
+      speakNextChunk();
     };
   }
 }
@@ -359,14 +443,29 @@ function speakText(text) {
 function stopVoice() { window.speechSynthesis.cancel(); setVoiceStatus('done','✓ Stopped'); }
 function replayVoice() { buildVoiceScript(); speakText(voiceScript); }
 
-// Wait for BOTH weather AND news, then auto-speak the briefing
+// Wait for weather AND email, then auto-speak the briefing.
+// Watchdog: if speech hasn't started within 1.5s, assume autoplay was
+// silently blocked and show the manual "Hear Briefing" button.
 async function initVoice() {
-  setVoiceStatus('loading','Loading weather and news...');
-  await Promise.all([fetchWeather(), fetchNews()]);
+  setVoiceStatus('loading','Loading weather and email...');
+  await Promise.all([fetchWeather(), fetchRecentEmails()]);
   buildVoiceScript();
   document.getElementById('voice-controls').innerHTML =
     '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
-  startBriefing();
+  attemptAutoBriefing();
+}
+
+function attemptAutoBriefing() {
+  buildVoiceScript();
+  let started = false;
+  speakText(voiceScript, () => { started = true; });
+  setTimeout(() => { if (!started) showTapToStart(); }, 1500);
+}
+
+function showTapToStart() {
+  setVoiceStatus('error','Tap to start — autoplay blocked');
+  document.getElementById('voice-controls').innerHTML =
+    '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
 }
 
 function startBriefing() { buildVoiceScript(); speakText(voiceScript); }
@@ -374,6 +473,12 @@ function startBriefing() { buildVoiceScript(); speakText(voiceScript); }
 initVoice();
 
 // ── AI BRIEFING ────────────────────────────────────────────
+// Previously called api.anthropic.com directly from client-side JS with no
+// key attached (always failed, and embedding a real key would expose it).
+// Point this at a Zapier webhook (server-side, holds the key safely) instead.
+// Replace ZAPIER_WEBHOOK_URL below with your actual Zapier Catch Hook URL.
+const ZAPIER_WEBHOOK_URL = 'REPLACE_WITH_YOUR_ZAPIER_WEBHOOK_URL';
+
 async function generateBriefing() {
   const btn=document.getElementById('gen-btn');
   const spinner=document.getElementById('spinner');
@@ -388,10 +493,21 @@ async function generateBriefing() {
   const notes=document.getElementById('in-notes').value;
   const net=(parseFloat(income)||0)-(parseFloat(expenses)||0)+(parseFloat(budgetBalance)||0);
   const todoText=todos.map((t,i)=>`${i+1}. ${t.text}${t.done?' (done)':''}`).join(', ');
-  const prompt=`You are Keith's personal assistant. Today is ${dateStr}. Generate a sharp personal morning briefing. Tone: direct, efficient.\n\nBUDGET:\n- Income: ${income?'$'+income:'not entered'}\n- Expenses: ${expenses?'$'+expenses:'not entered'}\n- Bank: ${bank?'$'+bank:'not entered'}\n- Net: $${net.toFixed(2)}\n\nWEATHER: ${weatherData.temp?`High ${weatherData.high}°F, ${weatherData.desc}, wind ${weatherData.wind} mph`:'N/A'}\n\nNEWS:\n1. ${newsHeadlines[0]?.title||''}\n2. ${newsHeadlines[1]?.title||''}\n3. ${newsHeadlines[2]?.title||''}\n\nTO-DO: ${todoText||'none'}\n\nNOTES: ${notes||'none'}\n\n3 sections — Financial Pulse, Today's Priorities, Watch List. Under 200 words.`;
+  const prompt=`You are Keith's personal assistant. Today is ${dateStr}. Generate a sharp personal morning briefing. Tone: direct, efficient.\n\nBUDGET:\n- Income: ${income?'$'+income:'not entered'}\n- Expenses: ${expenses?'$'+expenses:'not entered'}\n- Bank: ${bank?'$'+bank:'not entered'}\n- Net: $${net.toFixed(2)}\n\nWEATHER: ${weatherData.temp?`High ${weatherData.high}°F, ${weatherData.desc}, wind ${weatherData.wind} mph`:'N/A'}\n\nTO-DO: ${todoText||'none'}\n\nNOTES: ${notes||'none'}\n\n3 sections — Financial Pulse, Today's Priorities, Watch List. Under 200 words.`;
+
+  if (ZAPIER_WEBHOOK_URL.includes('REPLACE_WITH_YOUR')) {
+    output.innerHTML='<div class="ai-briefing-text" style="color:#e06060;">Zapier webhook URL not configured yet.</div>';
+    btn.disabled=false; spinner.style.display='none'; label.textContent='Regenerate Briefing';
+    return;
+  }
+
   try {
-    const data=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})}).then(r=>r.json());
-    const text=data.content?.map(b=>b.text||'').join('')||'No response.';
+    const data = await fetch(ZAPIER_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ prompt })
+    }).then(r=>r.json());
+    const text = data.text || data.output || data.result || 'No response.';
     output.innerHTML='<div class="ai-briefing-text"><p>'+text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p></div>';
   } catch(e) {
     output.innerHTML='<div class="ai-briefing-text" style="color:#e06060;">Error generating briefing.</div>';
