@@ -256,8 +256,7 @@ async function fetchWeather() {
 // shifts rows down -> writes from/subject/date into rows 2-4).
 // Replace SHEET_CSV_URL below with your actual "Publish to web" CSV link
 // from Google Sheets (File > Share > Publish to web > CSV).
-const SHEET_CSV_URL = 'REPLACE_WITH_YOUR_PUBLISHED_SHEET_CSV_URL';
-
+const  SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKMIxCHzIKxv4qGa08IreklzC3_X_aEXsPebgWF_rFtUr-IQ2xU1bkSrlld-Q1kMu-OJ7QTwAhVpJk/pub?gid=0&single=true&output=csv';
 function parseCsvLine(line) {
   const result = [];
   let cur = '';
@@ -271,8 +270,7 @@ function parseCsvLine(line) {
       } else {
         cur += ch;
       }
-    } else {
-      if (ch === '"') inQuotes = true;
+    } else  
       else if (ch === ',') { result.push(cur); cur = ''; }
       else cur += ch;
     }
@@ -292,7 +290,7 @@ async function fetchRecentEmails() {
   try {
     const text = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes('?') ? '&' : '?') + '_=' + Date.now()).then(r=>r.text());
     const lines = text.split(/\r?\n/).filter(Boolean);
-    const dataLines = lines.slice(1, 4);
+   const datalines = lines.slice(1).slice(-4).reverse();
     recentEmails = dataLines.map(line => {
       const [from, subject, date] = parseCsvLine(line);
       return { from: from||'', subject: subject||'', date: date||'' };
