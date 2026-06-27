@@ -283,30 +283,38 @@ function parseCsvLine(line) {
   return result.map(s=>s.trim());
 }
 
-let recentEmails = [];
+let newsItems = [];
 
-async function fetchRecentEmails() {
-  const emailEl = document.getElementById('email-content');
-  if (!SHEET_CSV_URL || SHEET_CSV_URL.includes('REPLACE_WITH_YOUR')) {
-    emailEl.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">Email sheet not configured yet</div>';
-    return;
-  }
+async function fetchNews() {
+  const newsEl = document.getElementById('news-content');
   try {
-    const text = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes('?') ? '&' : '?') + '_=' + Date.now()).then(r=>r.text());
-    const lines = text.split(/\r?\n/).filter(Boolean);
-   const datalines = lines.slice(1).slice(-4).reverse();
-    recentEmails = dataLines.map(line => {
-      const [from, subject, date] = parseCsvLine(line);
-      return { from: from||'', subject: subject||'', date: date||'' };
-    }).filter(e => e.from || e.subject);
+    const feeds = [
+      'https://feeds.bbci.co.uk/news/rss.xml',
+      'https://feeds.bbci.co.uk/news/business/rss.xml'
+    ];
+    const results = await Promise.all(feeds.map(url =>
+      fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url))
+        .then(r => r.text())
+    ));
 
-    if (!recentEmails.length) throw new Error('empty');
+    const parser = new DOMParser();
+    let items = [];
+    results.forEach(xmlText => {
+      const xml = parser.parseFromString(xmlText, 'text/xml');
+      const entries = Array.from(xml.querySelectorAll('item')).slice(0, 2);
+      entries.forEach(item => {
+        items.push(item.querySelector('title')?.textContent || '');
+      });
+    });
 
-    emailEl.innerHTML = recentEmails.map((e,i) =>
-      `<div class="email-item"><div class="email-num">${i+1}</div><div><div class="email-subject">${e.subject||'(no subject)'}</div><div class="email-from">${e.from}</div></div></div>`
+    newsItems = items.slice(0, 4);
+    if (!newsItems.length) throw new Error('empty');
+
+    newsEl.innerHTML = newsItems.map((title, i) =>
+      `<div class="email-item"><div class="email-num">${i+1}</div><div><div class="email-subject">${title}</div></div></div>`
     ).join('');
-  } catch(e) {
-    emailEl.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">Recent email unavailable</div>';
+  } catch (e) {
+    newsEl.innerHTML = '<div style="font-size:13px;color:var(--cream-dim);">News unavailable</div>';
   }
 }
 
