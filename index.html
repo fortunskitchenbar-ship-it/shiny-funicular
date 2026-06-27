@@ -270,9 +270,13 @@ function parseCsvLine(line) {
       } else {
         cur += ch;
       }
-    } else  
-      else if (ch === ',') { result.push(cur); cur = ''; }
-      else cur += ch;
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      result.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
     }
   }
   result.push(cur);
