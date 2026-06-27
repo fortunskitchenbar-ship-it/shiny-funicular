@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+nt <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -450,7 +450,7 @@ function replayVoice() { buildVoiceScript(); speakText(voiceScript); }
 // silently blocked and show the manual "Hear Briefing" button.
 async function initVoice() {
   setVoiceStatus('loading','Loading weather and email...');
-  await Promise.all([fetchWeather(), fetchRecentEmails()]);
+  await Promise.all([fetchWeather(), fetchNews()]);
   buildVoiceScript();
   document.getElementById('voice-controls').innerHTML =
     '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
