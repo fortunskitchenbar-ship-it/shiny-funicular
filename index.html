@@ -457,8 +457,8 @@ function replayVoice() { buildVoiceScript(); speakText(voiceScript); }
 // Watchdog: if speech hasn't started within 1.5s, assume autoplay was
 // silently blocked and show the manual "Hear Briefing" button.
 async function initVoice() {
-  setVoiceStatus('loading','Loading weather and email...');
-  await Promise.all([fetchWeather(), fetchNews()]);
+  setVoiceStatus('loading','Loading weather, news, and to-dos...');
+  await Promise.all([fetchWeather(), fetchNews(), loadTodos()]);
   buildVoiceScript();
   document.getElementById('voice-controls').innerHTML =
     '<button class="btn-voice btn-play-main" onclick="startBriefing()">&#9654; Hear Briefing</button>';
@@ -480,7 +480,7 @@ function showTapToStart() {
 
 function startBriefing() { buildVoiceScript(); speakText(voiceScript); }
 
-initVoice();
+
 
 // ── AI BRIEFING ────────────────────────────────────────────
 // Previously called api.anthropic.com directly from client-side JS with no
