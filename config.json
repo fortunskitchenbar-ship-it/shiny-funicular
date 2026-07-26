@@ -1,0 +1,57 @@
+{
+  "_comment": "Morning Briefing config — fortunskitchenbar-ship-it/shiny-funicular",
+  "_raw_url": "https://raw.githubusercontent.com/fortunskitchenbar-ship-it/shiny-funicular/main/config.json",
+
+  "site": {
+    "title": "Keith Daily Brief",
+    "owner": "Keith",
+    "greeting": "Good morning, Keith!",
+    "tagline": "HEY KEITH — Live Weather + Top Stories + Play Briefing"
+  },
+
+  "location": {
+    "city": "La Quinta",
+    "state": "CA",
+    "country": "US",
+    "timezone": "America/Los_Angeles",
+    "latitude": 33.6636,
+    "longitude": -116.3103
+  },
+
+  "weather": {
+    "provider": "open-meteo",
+    "api_url": "https://api.open-meteo.com/v1/forecast",
+    "temperature_unit": "fahrenheit",
+    "windspeed_unit": "mph",
+    "forecast_days": 1,
+    "refresh_interval_minutes": 30
+  },
+
+  "voice": {
+    "enabled": true,
+    "auto_play_on_load": true,
+    "language": "en-US",
+    "rate": 1.0,
+    "pitch": 1.0,
+    "volume": 1.0
+  },
+
+  "integrations": {
+    "zapier_webhook_url": "REPLACE_WITH_YOUR_ZAPIER_WEBHOOK_URL",
+    "supabase_url": "REPLACE_WITH_YOUR_SUPABASE_URL",
+    "supabase_anon_key": "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY",
+    "openai_model": "gpt-4o-mini"
+  },
+
+  "briefing": {
+    "sections": ["Financial Pulse", "Today's Priorities", "Watch List"],
+    "max_words": 200,
+    "tone": "direct, efficient"
+  },
+
+  "deploy": {
+    "netlify_url": "https://keith-brief-app.netlify.app",
+    "vercel_url": "https://keith-brief-app.vercel.app",
+    "github_pages_branch": "main"
+  }
+}
