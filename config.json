@@ -1,0 +1,50 @@
+{
+  "site": {
+    "title": "Personal Morning Briefing",
+    "wordmark": "Morning Briefing",
+    "owner": "Keith"
+  },
+  "location": {
+    "city": "La Quinta",
+    "state": "CA",
+    "latitude": 33.6636,
+    "longitude": -116.3103,
+    "timezone": "America/Los_Angeles"
+  },
+  "weather": {
+    "temperatureUnit": "fahrenheit",
+    "windspeedUnit": "mph",
+    "forecastDays": 1,
+    "refreshIntervalMinutes": 15
+  },
+  "voice": {
+    "enabled": true,
+    "autoPlayOnLoad": false,
+    "preferredVoiceNames": ["Zira", "Ava", "Samantha", "Victoria", "Karen"],
+    "rate": 1.0,
+    "pitch": 1.0
+  },
+  "budget": {
+    "dailySpendingLimit": 100,
+    "currency": "USD",
+    "trackingEnabled": true
+  },
+  "theme": {
+    "accentColor": "#c9a84c",
+    "backgroundColor": "#0a0a08",
+    "fontSerif": "Playfair Display",
+    "fontMono": "DM Mono",
+    "fontSans": "DM Sans"
+  },
+  "todos": {
+    "showCompletedForHours": 24,
+    "maxVisible": 10
+  },
+  "briefing": {
+    "greeting": "Good morning",
+    "closingLine": "Have a great day!",
+    "includeWeather": true,
+    "includeTodos": true,
+    "includeBudget": true
+  }
+}
