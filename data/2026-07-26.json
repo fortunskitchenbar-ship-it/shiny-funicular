@@ -1,0 +1,38 @@
+{
+  "date": "2026-07-26",
+  "owner": "Keith",
+  "todos": [
+    { "text": "Review morning briefing", "done": false },
+    { "text": "Check weekly budget", "done": false },
+    { "text": "Follow up on open items", "done": false }
+  ],
+  "budget": {
+    "income": 0,
+    "expenses": 0,
+    "bankBalance": 0,
+    "budgetBalance": 0,
+    "net": 0,
+    "currency": "USD"
+  },
+  "weather": {
+    "location": "La Quinta, CA",
+    "temperatureUnit": "fahrenheit",
+    "high": null,
+    "low": null,
+    "description": null,
+    "windMph": null,
+    "humidity": null,
+    "rainChance": null,
+    "fetchedAt": null
+  },
+  "notes": "",
+  "briefing": {
+    "generatedText": "",
+    "voiceScript": "",
+    "generatedAt": null
+  },
+  "meta": {
+    "version": "1.0",
+    "createdAt": "2026-07-26T22:28:00Z"
+  }
+}
